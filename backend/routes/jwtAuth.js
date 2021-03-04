@@ -21,10 +21,9 @@ router.post("/register", validInfo, async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(password, salt);
-
+    const timestamp = Date.now()
     let newUser = await pool.query(
-      "INSERT INTO users (user_name, email, password) VALUES ($1, $2, $3) RETURNING *",
-      [name, email, bcryptPassword]
+      `INSERT INTO users (user_name, email, password, timestamp) VALUES ('${name}', '${email}', '${bcryptPassword}','${timestamp}') RETURNING *`,
     );
 
     const jwtToken = jwtGenerator(newUser.rows[0].id);
@@ -41,9 +40,7 @@ router.post("/login", validInfo, async (req, res) => {
   console.log(email,password);
 
   try {
-    const user = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email
-    ]);
+    const user = await pool.query(`SELECT * FROM users WHERE email = '${email}'`)
     
 
     if (user.rows.length === 0) {
